@@ -236,20 +236,26 @@ CALL iwb()
 -- 12 задание
 BEGIN;
 CREATE TABLE blood_relations (
-  id SERIAL PRIMARY key,
+  relative_id integer REFERENCES people(id));
   relation_type VARCHAR(255) NOT NULL,
-  people_id integer REFERENCES people(id));
+  person_id integer REFERENCES people(id),	
 COMMIT;
 
 -- 13 задание 
 CREATE OR REPLACE PROCEDURE 
-add_person(IN add_name varchar, add_surname varchar, add_birth_date DATE, add_growth real, add_weight real, add_eyes varchar, add_hair varchar,add_relation_type varchar,add_people_id int)
+add_person(IN add_name varchar, add_surname varchar, add_birth_date DATE, add_growth real, add_weight real, add_eyes varchar, add_hair varchar, add_relation_type varchar, add_relative_id int)
 AS $$
+DECLARE
+	pers_id int;
 BEGIN
 	INSERT INTO people (name, surname, birth_date, growth, weight, eyes, hair)
 	VALUES (add_name, add_surname, add_birth_date, add_growth, add_weight, add_eyes, add_hair);
-	INSERT INTO blood_relations(relation_type, people_id)
-	VALUES (add_relation_type, add_people_id);
+	SELECT id INTO pers_id
+	FROM people
+	ORDER BY id DESC
+	LIMIT 1;
+	INSERT INTO blood_relations(person_id, relation_type, relative_id)
+	VALUES (pers_id, add_relation_type, add_relative_id);
 END;
 $$ LANGUAGE plpgsql;
 
