@@ -2,9 +2,10 @@ package main
 
 import (
 	"bufio"
-	"console_game/krot"
 	"fmt"
 	"os"
+
+	"github.com/IB133/RPBD/tree/console_game/krot"
 )
 
 func main() {
