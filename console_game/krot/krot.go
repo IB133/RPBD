@@ -6,92 +6,103 @@ import (
 )
 
 type Krot struct {
-	Nora_len int
-	Hp       int
-	Rep      int
-	Weight   float32
+	noraLen int
+	hp      int
+	rep     int
+	weight  float32
+}
+
+func New() *Krot {
+	return &Krot{
+		noraLen: 15,
+		hp:      15,
+		rep:     5,
+		weight:  15,
+	}
 }
 
 func (k *Krot) Dig(intense bool) {
 	if intense {
-		k.Nora_len += 5
-		k.Hp -= 30
-	} else {
-		k.Nora_len += 2
-		k.Hp -= 10
+		k.noraLen += 5
+		k.hp -= 30
 	}
+	k.noraLen += 2
+	k.hp -= 10
 
 }
 
 func (k *Krot) Eat(green bool) {
 	if green {
-		if k.Rep < 30 {
-			k.Hp -= 30
-		} else if k.Rep >= 30 {
-			k.Hp += 30
-			k.Weight += 30
+		if k.rep < 30 {
+			k.hp -= 30
+		} else if k.rep >= 30 {
+			k.hp += 30
+			k.weight += 30
 		}
-	} else {
-		k.Hp += 10
-		k.Weight += 15
 	}
+	k.hp += 10
+	k.weight += 15
 }
 
-func (k *Krot) Fight(enemy_Weight int) string {
+func (k *Krot) Fight(enemyWeight int) string {
 	var chance = rand.Float32()
-	switch enemy_Weight {
+	switch enemyWeight {
 	case 30:
-		if k.Weight/30 >= chance {
-			k.Rep += Rep_changes(30, k.Weight)
+		if k.weight/30 >= chance {
+			k.rep += repChanges(30, k.weight)
 			return "Вы победили"
-		} else {
-			k.Hp -= 15
-			return "Вы проиграли"
 		}
+		k.hp -= 15
+		return "Вы проиграли"
 	case 50:
-		if k.Weight/50 >= chance {
-			k.Rep += Rep_changes(50, k.Weight)
+		if k.weight/50 >= chance {
+			k.rep += repChanges(50, k.weight)
 			return "Вы победили"
-		} else {
-			k.Hp -= 30
-			return "Вы проиграли"
 		}
+		k.hp -= 30
+		return "Вы проиграли"
 	case 70:
-		if k.Weight/70 >= chance {
-			k.Rep += Rep_changes(70, k.Weight)
+		if k.weight/70 >= chance {
+			k.rep += repChanges(70, k.weight)
 			return "Вы победили"
-		} else {
-			k.Hp -= 45
-			return "Вы проиграли"
 		}
+		k.hp -= 45
+		return "Вы проиграли"
 	}
 	return ""
 }
 
 func (k *Krot) Sleep() {
-	k.Nora_len -= 2
-	k.Hp += 20
-	k.Rep -= 2
-	k.Weight -= 5
+	k.noraLen -= 2
+	k.hp += 20
+	k.rep -= 2
+	k.weight -= 5
 }
 
 func (k *Krot) Stats() string {
-	return fmt.Sprintf("Your stats:\nHp:%v\nRep:%v\nWeight:%v\nHole length:%v", k.Hp, k.Rep, k.Weight, k.Nora_len)
+	return fmt.Sprintf("Your stats:\nhp:%v\nrep:%v\nweight:%v\nHole length:%v\n", k.hp, k.rep, k.weight, k.noraLen)
 }
 
-func Rep_changes(e_Weight float32, k_Weight float32) int {
-	switch {
-	case e_Weight == 30 && k_Weight < 50:
-		return 10
-	case e_Weight == 30 && k_Weight >= 50:
-		return 5
-	case e_Weight == 50 && k_Weight < 70:
-		return 20
-	case e_Weight == 50 && k_Weight >= 70:
-		return 10
-	case e_Weight == 70:
-		return 40
+func (k *Krot) IsWin() bool {
+	return k.rep >= 100
+}
 
+func (k *Krot) IsLoose() bool {
+	return k.hp <= 0 || k.noraLen <= 0 || k.rep <= 0 || k.weight <= 0
+}
+
+func repChanges(eWeight float32, kWeight float32) int {
+	switch {
+	case eWeight == 30 && kWeight < 50:
+		return 10
+	case eWeight == 30 && kWeight >= 50:
+		return 5
+	case eWeight == 50 && kWeight < 70:
+		return 20
+	case eWeight == 50 && kWeight >= 70:
+		return 10
+	case eWeight == 70:
+		return 40
 	}
 	return 0
 }
