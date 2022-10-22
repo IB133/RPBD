@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/IB133/RPBD/tree/console_game/krot"
+	"github.com/IB133/RPBD/console_game/krot"
 )
 
 func info(w io.Writer, s string) {
