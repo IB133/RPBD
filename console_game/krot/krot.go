@@ -25,6 +25,7 @@ func (k *Krot) Dig(intense bool) {
 	if intense {
 		k.noraLen += 5
 		k.hp -= 30
+		return
 	}
 	k.noraLen += 2
 	k.hp -= 10
@@ -39,6 +40,7 @@ func (k *Krot) Eat(green bool) {
 			k.hp += 30
 			k.weight += 30
 		}
+		return
 	}
 	k.hp += 10
 	k.weight += 15

@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/IB133/RPBD/tree/console_game/krot"
+	"github.com/IB133/RPBD/console_game/krot"
 )
 
 func info(w io.Writer, s string) {
@@ -59,9 +59,11 @@ func Start() {
 		}
 		if k.IsLoose() {
 			fmt.Println("You loose")
+			return
 		}
 		if k.IsWin() {
 			fmt.Println("You win!!!")
+			return
 		}
 		fmt.Println("Night is coming")
 		k.Sleep()

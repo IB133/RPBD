@@ -1,3 +1,3 @@
-module github.com/IB133/RPBD/tree/console_game
+module github.com/IB133/RPBD/console_game
 
 go 1.19
