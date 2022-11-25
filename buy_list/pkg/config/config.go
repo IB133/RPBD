@@ -11,9 +11,11 @@ type Config struct {
 }
 
 type Keyboards struct {
-	Main    tgbotapi.ReplyKeyboardMarkup
-	BuyList tgbotapi.ReplyKeyboardMarkup
-	Fridge  tgbotapi.ReplyKeyboardMarkup
+	Main          tgbotapi.ReplyKeyboardMarkup
+	BuyOrNew      tgbotapi.ReplyKeyboardMarkup
+	Fridge        tgbotapi.InlineKeyboardMarkup
+	UpdateFridge  tgbotapi.InlineKeyboardMarkup
+	UpdateProduct tgbotapi.InlineKeyboardMarkup
 }
 
 type Responses struct {
@@ -34,6 +36,18 @@ var (
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("Список продуктов в холодильнике"),
 			tgbotapi.NewKeyboardButton("Список ранее используемых продуктов"),
+		),
+	)
+	buylistOrNew = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("Из списка покупок"),
+			tgbotapi.NewKeyboardButton("Новый продукт"),
+		),
+	)
+	updateStatusProduct = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Продукт", "updateProductStatus"),
+			tgbotapi.NewInlineKeyboardButtonData("Статус", "updateProductStatus"),
 		),
 	)
 )
@@ -74,8 +88,10 @@ func setUpViper() error {
 	return viper.ReadInConfig()
 }
 
-func (c *Config) NewKeyboard() Keyboards {
-	return Keyboards{
-		Main: mainKeyboard,
+func (c *Config) NewKeyboard() *Keyboards {
+	return &Keyboards{
+		Main:          mainKeyboard,
+		BuyOrNew:      buylistOrNew,
+		UpdateProduct: updateStatusProduct,
 	}
 }

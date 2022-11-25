@@ -1,6 +1,7 @@
 package tgbot
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/IB133/RPBD/buy_list/pkg/config"
@@ -10,7 +11,7 @@ import (
 type Bot struct {
 	bot       *tgbotapi.BotAPI
 	messages  config.Responses
-	keyboards config.Keyboards
+	keyboards *config.Keyboards
 }
 
 func NewBot(b *tgbotapi.BotAPI, cfg *config.Config) *Bot {
@@ -40,6 +41,14 @@ func (b *Bot) Start() error {
 		}
 		if err := b.handleMessages(update.Message); err != nil {
 			log.Fatal()
+		}
+		if update.CallbackQuery != nil {
+			fmt.Println("Aboba")
+			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
+			b.handleCallbackQuery(&update)
+			if _, err := b.bot.Request(callback); err != nil {
+				log.Fatal()
+			}
 		}
 	}
 	return nil

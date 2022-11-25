@@ -24,11 +24,10 @@ func (b *Bot) handleMessages(mes *tgbotapi.Message) error {
 	msg := tgbotapi.NewMessage(mes.Chat.ID, mes.Text)
 	switch mes.Text {
 	case b.keyboards.Main.Keyboard[0][0].Text:
-		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		handleAddToBuyList(&msg)
+		msg.Text = "Добавление в список покупок"
 
 	case b.keyboards.Main.Keyboard[0][1].Text:
-		msg.ReplyToMessageID = mes.MessageID
+		msg.ReplyMarkup = b.keyboards.BuyOrNew
 
 	case b.keyboards.Main.Keyboard[1][0].Text:
 		msg.ReplyToMessageID = mes.MessageID
@@ -63,8 +62,12 @@ func (b *Bot) handleIncorrect(mes *tgbotapi.Message) error {
 	return nil
 }
 
-func handleAddToBuyList(msg *tgbotapi.MessageConfig) error {
-	msg.Text = "Введите вес в кг"
-	msg.Text = "Введите aboba в кг"
+func (b *Bot) handleCallbackQuery(c *tgbotapi.Update) error {
+	switch c.CallbackQuery.Data {
+	case "addProductToB":
+		msg := tgbotapi.NewMessage(c.CallbackQuery.Message.Chat.ID, "Абоба")
+		b.bot.Send(msg)
+	}
+
 	return nil
 }
