@@ -4,7 +4,7 @@ CREATE TABLE users(
     name varchar(255),
     chat_id int
 );
-CREATE TYPE status AS ENUM ('used', 'dispose', 'stored');
+CREATE TYPE status AS ENUM ('used', 'dispose', 'stored', 'opened');
 CREATE TABLE fridge(
     user_id integer REFERENCES users(id) ON DELETE CASCADE,
     prod_name varchar(255),

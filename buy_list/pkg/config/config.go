@@ -8,24 +8,42 @@ import (
 type Config struct {
 	Responses
 	Keyboards
+	Position
+	Errors
+}
+
+type Position struct {
+	AddToBuyList           bool
+	AddToFridge            bool
+	OpenProduct            bool
+	ChangeStatus           bool
+	GetStatistic           bool
+	UserInsert             bool
+	AddToFridgeFromBuyList bool
 }
 
 type Keyboards struct {
-	Main          tgbotapi.ReplyKeyboardMarkup
-	BuyOrNew      tgbotapi.ReplyKeyboardMarkup
-	Fridge        tgbotapi.InlineKeyboardMarkup
-	UpdateFridge  tgbotapi.InlineKeyboardMarkup
-	UpdateProduct tgbotapi.InlineKeyboardMarkup
+	Main     tgbotapi.ReplyKeyboardMarkup
+	BuyOrNew tgbotapi.ReplyKeyboardMarkup
+	Cancel   tgbotapi.ReplyKeyboardMarkup
+	Current  tgbotapi.ReplyKeyboardMarkup
 }
 
 type Responses struct {
-	Start string `mapstructure:"start"`
+	Start      string `mapstructure:"start"`
+	Succesfull string `mapstructure:"succesfull"`
+}
+
+type Errors struct {
+	Default      string `mapstructure:"default"`
+	UserNotFound string `mapstructure:"user_not_found"`
+	ErrorInsert  string `mapstructure:"error_insert"`
 }
 
 var (
 	mainKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Добавить новый продукт"),
+			tgbotapi.NewKeyboardButton("Добавить продукт в список покупок"),
 			tgbotapi.NewKeyboardButton("Добавить продукт в холодильник"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
@@ -42,12 +60,12 @@ var (
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("Из списка покупок"),
 			tgbotapi.NewKeyboardButton("Новый продукт"),
+			tgbotapi.NewKeyboardButton("Отмена"),
 		),
 	)
-	updateStatusProduct = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Продукт", "updateProductStatus"),
-			tgbotapi.NewInlineKeyboardButtonData("Статус", "updateProductStatus"),
+	cancel = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("Отмена"),
 		),
 	)
 )
@@ -74,9 +92,9 @@ func unmarshal(cfg *Config) error {
 		return err
 	}
 
-	// if err := viper.UnmarshalKey("messages.error", &cfg.Messages.Errors); err != nil {
-	// 	return err
-	// }
+	if err := viper.UnmarshalKey("config.error", &cfg.Errors); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -88,10 +106,11 @@ func setUpViper() error {
 	return viper.ReadInConfig()
 }
 
-func (c *Config) NewKeyboard() *Keyboards {
+func NewKeyboard() *Keyboards {
 	return &Keyboards{
-		Main:          mainKeyboard,
-		BuyOrNew:      buylistOrNew,
-		UpdateProduct: updateStatusProduct,
+		Main:     mainKeyboard,
+		BuyOrNew: buylistOrNew,
+		Cancel:   cancel,
+		Current:  mainKeyboard,
 	}
 }
