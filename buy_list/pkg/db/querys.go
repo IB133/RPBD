@@ -10,19 +10,21 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type User struct {
-	Id       string
-	Chat_id  int
-	Username string
+type Users struct {
+	Id      int
+	Chat_id int64
+	Name    string
 }
 
 type BuyList struct {
+	User_id   int
 	Weight    float32
 	Prod_name string
 	Buy_time  string
 }
 
 type Fridge struct {
+	User_id           int
 	Status            string
 	Prod_name         string
 	Experitation_date time.Time
@@ -43,7 +45,7 @@ func NewConnect(connString string) (*Connection, error) {
 	}, nil
 }
 
-func (c *Connection) AddProductToBuyList(user_id string, name string, weight string, time string) error {
+func (c *Connection) AddProductToBuyList(user_id int, name string, weight string, time string) error {
 	_, err := c.conn.ExecContext(context.Background(), `
 	INSERT INTO buy_list(user_id, prod_name, weight, buy_time)
 	VALUES($1, $2, $3, $4);
@@ -54,7 +56,7 @@ func (c *Connection) AddProductToBuyList(user_id string, name string, weight str
 	return nil
 }
 
-func (c *Connection) AddProductToFridge(user_id string, name string, date string) error {
+func (c *Connection) AddProductToFridge(user_id int, name string, date string) error {
 	_, err := c.conn.ExecContext(context.Background(), `
 	INSERT INTO fridge(user_id, prod_name, experitation_date)
 	VALUES($1, $2, $3);
@@ -65,7 +67,7 @@ func (c *Connection) AddProductToFridge(user_id string, name string, date string
 	return nil
 }
 
-func (c *Connection) GetBuyList(user_id string) ([]BuyList, error) {
+func (c *Connection) GetBuyList(user_id int) ([]BuyList, error) {
 	var buyList []BuyList
 	err := c.conn.SelectContext(context.Background(), &buyList, `
 	SELECT prod_name, weight, buy_time
@@ -78,8 +80,8 @@ func (c *Connection) GetBuyList(user_id string) ([]BuyList, error) {
 	return buyList, nil
 }
 
-func (c *Connection) GetUserByUsername(username string) (User, error) {
-	u := User{}
+func (c *Connection) GetUserByUsername(username string) (Users, error) {
+	u := Users{}
 	err := c.conn.GetContext(context.Background(), &u, "SELECT id FROM users WHERE name = $1", username)
 	if err != nil {
 		return u, fmt.Errorf("people not found: %w", err)
@@ -87,7 +89,7 @@ func (c *Connection) GetUserByUsername(username string) (User, error) {
 	return u, nil
 }
 
-func (c *Connection) GetFridgeList(user_id string) ([]Fridge, error) {
+func (c *Connection) GetFridgeList(user_id int) ([]Fridge, error) {
 	var fridge []Fridge
 	err := c.conn.SelectContext(context.Background(), &fridge, `
 	SELECT prod_name, status, experitation_date
@@ -101,7 +103,7 @@ func (c *Connection) GetFridgeList(user_id string) ([]Fridge, error) {
 	return fridge, nil
 }
 
-func (c *Connection) GetUsedProductsList(user_id string) ([]Fridge, error) {
+func (c *Connection) GetUsedProductsList(user_id int) ([]Fridge, error) {
 	var fridge []Fridge
 	err := c.conn.SelectContext(context.Background(), &fridge, `
 	SELECT prod_name, status
@@ -114,7 +116,7 @@ func (c *Connection) GetUsedProductsList(user_id string) ([]Fridge, error) {
 	return fridge, nil
 }
 
-func (c *Connection) DeleteFromBuyList(user_id string, name string) error {
+func (c *Connection) DeleteFromBuyList(user_id int, name string) error {
 	_, err := c.conn.ExecContext(context.Background(), `
 	DELETE FROM buy_list
 	WHERE user_id = $1 AND prod_name = $2;
@@ -125,7 +127,7 @@ func (c *Connection) DeleteFromBuyList(user_id string, name string) error {
 	return nil
 }
 
-func (c *Connection) UpdateProductToCooked(user_id string, name string, date string) error {
+func (c *Connection) UpdateProductToCooked(user_id int, name string, date string) error {
 	_, err := c.conn.ExecContext(context.Background(), `
 	UPDATE fridge 
 	SET status = 'used',  status_date= $1
@@ -137,7 +139,7 @@ func (c *Connection) UpdateProductToCooked(user_id string, name string, date str
 	return nil
 }
 
-func (c *Connection) UpdateProductToDispose(user_id string, name string, date string) error {
+func (c *Connection) UpdateProductToDispose(user_id int, name string, date string) error {
 	_, err := c.conn.ExecContext(context.Background(), `
 	UPDATE fridge 
 	SET status = 'dispose',  status_date= $1
@@ -149,7 +151,7 @@ func (c *Connection) UpdateProductToDispose(user_id string, name string, date st
 	return nil
 }
 
-func (c *Connection) OpenProduct(user_id string, name string, date string) error {
+func (c *Connection) OpenProduct(user_id int, name string, date string) error {
 	_, err := c.conn.ExecContext(context.Background(), `
 	UPDATE fridge 
 	SET experitation_date= $1, status = 'opened'
@@ -172,7 +174,7 @@ func (c *Connection) AddUser(name string, chat_id int) error {
 	return nil
 }
 
-func (c *Connection) GetStoredProductsList(user_id string) ([]Fridge, error) {
+func (c *Connection) GetStoredProductsList(user_id int) ([]Fridge, error) {
 	var fridge []Fridge
 	err := c.conn.SelectContext(context.Background(), &fridge, `
 	SELECT prod_name, status, experitation_date
@@ -186,7 +188,7 @@ func (c *Connection) GetStoredProductsList(user_id string) ([]Fridge, error) {
 	return fridge, nil
 }
 
-func (c *Connection) GetStatsByDateDifference(user_id string, firstDate string, secondDate string) ([]Fridge, error) {
+func (c *Connection) GetStatsByDateDifference(user_id int, firstDate string, secondDate string) ([]Fridge, error) {
 	var fridge []Fridge
 	err := c.conn.SelectContext(context.Background(), &fridge, `
 	SELECT status
@@ -197,4 +199,42 @@ func (c *Connection) GetStatsByDateDifference(user_id string, firstDate string, 
 		return nil, fmt.Errorf("query failed: %w", err)
 	}
 	return fridge, nil
+}
+
+func (c *Connection) GetBuyListForScheduler(userId int) ([]BuyList, error) {
+	var buyList []BuyList
+	err := c.conn.SelectContext(context.Background(), &buyList, `
+	SELECT *
+	FROM buy_list
+	WHERE buy_time::date = CURRENT_DATE AND user_id = $1;
+	`, userId)
+	if err != nil {
+		return nil, fmt.Errorf("query failed: %w", err)
+	}
+	return buyList, nil
+}
+
+func (c *Connection) GetFridgeListForScheduler(userId int) ([]Fridge, error) {
+	var fridge []Fridge
+	err := c.conn.SelectContext(context.Background(), &fridge, `
+	SELECT prod_name, status
+	FROM fridge
+	WHERE experitation_date = CURRENT_DATE AND user_id = $1 AND (status = 'opened' OR status = 'stored');
+	`, userId)
+	if err != nil {
+		return nil, fmt.Errorf("query failed: %w", err)
+	}
+	return fridge, nil
+}
+
+func (c *Connection) GetUsersList() ([]Users, error) {
+	var users []Users
+	err := c.conn.SelectContext(context.Background(), &users, `
+	SELECT *
+	FROM users;
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("query failed: %w", err)
+	}
+	return users, nil
 }

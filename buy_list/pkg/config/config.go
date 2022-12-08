@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/go-co-op/gocron"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/spf13/viper"
 )
@@ -10,6 +11,7 @@ type Config struct {
 	Keyboards
 	Position
 	Errors
+	Scheduler
 }
 
 type Position struct {
@@ -20,6 +22,11 @@ type Position struct {
 	GetStatistic           bool
 	UserInsert             bool
 	AddToFridgeFromBuyList bool
+}
+
+type Scheduler struct {
+	BuyListSched *gocron.Scheduler
+	FridgeSched  *gocron.Scheduler
 }
 
 type Keyboards struct {

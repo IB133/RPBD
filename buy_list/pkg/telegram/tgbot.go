@@ -1,4 +1,4 @@
-package tgbot
+package telegram
 
 import (
 	"fmt"
@@ -43,9 +43,9 @@ func (b *Bot) Start() error {
 	log.Printf("Authorized on account %s", b.bot.Self.UserName)
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
+	b.StartScheduler(b.cnf)
 
 	updates := b.bot.GetUpdatesChan(u)
-
 	for update := range updates {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 		if update.Message.IsCommand() {

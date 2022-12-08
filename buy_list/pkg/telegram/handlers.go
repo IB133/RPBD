@@ -1,4 +1,4 @@
-package tgbot
+package telegram
 
 import (
 	"fmt"
@@ -70,12 +70,7 @@ func (b *Bot) handleKeyboard(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 	case b.cnf.BuyOrNew.Keyboard[0][0].Text:
 		b.cnf.AddToFridgeFromBuyList = true
 		b.cnf.UserInsert = true
-		str, err := db.GetBuyList(mes.From.UserName, *b.que)
-		if err != nil {
-			msg.Text = err.Error()
-			break
-		}
-		msg.Text = "Выберите один из продуктов\n" + str
+		msg.Text = db.GetBuyList(mes.From.UserName, *b.que, *b.cnf)
 
 	case b.cnf.BuyOrNew.Keyboard[0][1].Text:
 		b.cnf.AddToFridge = true
@@ -129,11 +124,7 @@ func (b *Bot) handleMessages(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 			msg.Text = "Неверный ввод"
 			break
 		}
-		if err := db.AddProductToFridge(str[0], mes.From.UserName, str[1], *b.que); err != nil {
-			msg.Text = err.Error()
-			break
-		}
-		msg.Text = "Заебсиь чотко"
+		msg.Text = db.AddProductToFridge(str[0], mes.From.UserName, str[1], *b.que, *b.cnf)
 		msg.ReplyMarkup = b.cnf.BuyOrNew
 		b.cnf.AddToFridge = false
 		b.cnf.UserInsert = false
@@ -144,11 +135,7 @@ func (b *Bot) handleMessages(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 			msg.Text = "Неверный ввод"
 			break
 		}
-		if err := db.AddProductToFridgeFromBuyList(str[0], mes.From.UserName, str[1], *b.que); err != nil {
-			msg.Text = err.Error()
-			break
-		}
-		msg.Text = "Заебсиь чотко"
+		msg.Text = db.AddProductToFridgeFromBuyList(str[0], mes.From.UserName, str[1], *b.que, *b.cnf)
 		msg.ReplyMarkup = b.cnf.BuyOrNew
 		b.cnf.AddToFridgeFromBuyList = false
 		b.cnf.UserInsert = false
