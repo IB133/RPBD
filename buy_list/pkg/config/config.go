@@ -45,6 +45,7 @@ type Errors struct {
 	Default      string `mapstructure:"default"`
 	UserNotFound string `mapstructure:"user_not_found"`
 	ErrorInsert  string `mapstructure:"error_insert"`
+	NoRows       string `mapstructure:"no_rows"`
 }
 
 var (

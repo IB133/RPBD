@@ -14,7 +14,7 @@ import (
 type Bot struct {
 	bot *tgbotapi.BotAPI
 	cnf *config.Config
-	que *db.Connection
+	que *db.DB
 }
 
 func NewBot(cfg *config.Config) *Bot {

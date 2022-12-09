@@ -13,15 +13,34 @@ type Querys interface {
 	GetBuyList(username string, s Connection) (string, error)
 }
 
-func GetBuyList(username string, s Connection, mes config.Config) string {
-	var str string
-	u, err := s.GetUserByUsername(username)
+type DB struct {
+	Conn Connection
+}
+
+func (d *DB) AddToBuyList(username string, prodName string, weight string, date string, mes config.Config) string {
+	u, err := d.Conn.getUserByUsername(username)
 	if err != nil {
 		return mes.UserNotFound
 	}
-	list, err := s.GetBuyList(u.Id)
+	err = d.Conn.addProductToBuyList(u.Id, prodName, weight, date)
 	if err != nil {
 		return mes.Default
+	}
+	return mes.Succesfull
+}
+
+func (d *DB) GetBuyList(username string, mes config.Config) string {
+	var str string
+	u, err := d.Conn.getUserByUsername(username)
+	if err != nil {
+		return mes.UserNotFound
+	}
+	list, err := d.Conn.getBuyList(u.Id)
+	if err != nil {
+		return mes.Default
+	}
+	if len(list) == 0 {
+		return mes.NoRows
 	}
 	for _, v := range list {
 		str += fmt.Sprintf("%s  %.0f\n", v.Prod_name, v.Weight)
@@ -29,13 +48,13 @@ func GetBuyList(username string, s Connection, mes config.Config) string {
 	return fmt.Sprintf("Выберите продукт из списка\n %s", str)
 }
 
-func UsedProducts(username string, s Connection, mes config.Config) string {
+func (d *DB) UsedProducts(username string, mes config.Config) string {
 	var str string
-	u, err := s.GetUserByUsername(username)
+	u, err := d.Conn.getUserByUsername(username)
 	if err != nil {
 		return mes.UserNotFound
 	}
-	list, err := s.GetUsedProductsList(u.Id)
+	list, err := d.Conn.getUsedProductsList(u.Id)
 	if err != nil {
 		return mes.Default
 	}
@@ -45,40 +64,43 @@ func UsedProducts(username string, s Connection, mes config.Config) string {
 	return str
 }
 
-func AddProductToFridgeFromBuyList(prodName string, username string, date string, s Connection, mes config.Config) string {
-	u, err := s.GetUserByUsername(username)
+func (d *DB) AddProductToFridgeFromBuyList(prodName string, username string, date string, mes config.Config) string {
+	u, err := d.Conn.getUserByUsername(username)
 	if err != nil {
 		return mes.UserNotFound
 	}
-	if err = s.AddProductToFridge(u.Id, prodName, date); err != nil {
+	if err = d.Conn.addProductToFridge(u.Id, prodName, date); err != nil {
 		return mes.Default
 	}
-	if err = s.DeleteFromBuyList(u.Id, prodName); err != nil {
+	if err = d.Conn.deleteFromBuyList(u.Id, prodName); err != nil {
 		return mes.Default
 	}
 	return mes.Succesfull
 }
 
-func AddProductToFridge(prodName string, username string, date string, s Connection, mes config.Config) string {
-	u, err := s.GetUserByUsername(username)
+func (d *DB) AddProductToFridge(prodName string, username string, date string, mes config.Config) string {
+	u, err := d.Conn.getUserByUsername(username)
 	if err != nil {
 		return mes.UserNotFound
 	}
-	if err = s.AddProductToFridge(u.Id, prodName, date); err != nil {
+	if err = d.Conn.addProductToFridge(u.Id, prodName, date); err != nil {
 		return mes.Default
 	}
 	return mes.Succesfull
 }
 
-func StoredProductList(username string, s Connection, mes config.Config) string {
+func (d *DB) StoredProductList(username string, mes config.Config) string {
 	var str string
-	u, err := s.GetUserByUsername(username)
+	u, err := d.Conn.getUserByUsername(username)
 	if err != nil {
 		return mes.UserNotFound
 	}
-	list, err := s.GetStoredProductsList(u.Id)
+	list, err := d.Conn.getStoredProductsList(u.Id)
 	if err != nil {
 		return mes.Default
+	}
+	if len(list) == 0 {
+		return mes.NoRows
 	}
 	for _, v := range list {
 		str += fmt.Sprintf("%s  %s %s\n", v.Prod_name, "хранится", v.Experitation_date.Format("2006-01-02"))
@@ -86,26 +108,29 @@ func StoredProductList(username string, s Connection, mes config.Config) string 
 	return fmt.Sprintf("Выберите продукт из списка\n %s", str)
 }
 
-func OpenProduct(username string, prodName string, newDate string, s Connection, mes config.Config) string {
-	u, err := s.GetUserByUsername(username)
+func (d *DB) OpenProduct(username string, prodName string, newDate string, mes config.Config) string {
+	u, err := d.Conn.getUserByUsername(username)
 	if err != nil {
 		return mes.UserNotFound
 	}
-	if err = s.OpenProduct(u.Id, prodName, newDate); err != nil {
+	if err = d.Conn.openProduct(u.Id, prodName, newDate); err != nil {
 		return mes.Default
 	}
 	return mes.Succesfull
 }
 
-func FridgeList(username string, s Connection, mes config.Config) string {
+func (d *DB) FridgeList(username string, mes config.Config) string {
 	var str string
-	u, err := s.GetUserByUsername(username)
+	u, err := d.Conn.getUserByUsername(username)
 	if err != nil {
 		return mes.UserNotFound
 	}
-	list, err := s.GetFridgeList(u.Id)
+	list, err := d.Conn.getFridgeList(u.Id)
 	if err != nil {
 		return mes.Default
+	}
+	if len(list) == 0 {
+		return mes.NoRows
 	}
 	for _, v := range list {
 		switch v.Status {
@@ -123,18 +148,18 @@ func FridgeList(username string, s Connection, mes config.Config) string {
 	return str
 }
 
-func ChangeStatus(username string, prodName string, status string, s Connection, mes config.Config) string {
-	u, err := s.GetUserByUsername(username)
+func (d *DB) ChangeStatus(username string, prodName string, status string, mes config.Config) string {
+	u, err := d.Conn.getUserByUsername(username)
 	if err != nil {
 		return mes.UserNotFound
 	}
 	switch status {
 	case "приготовлен":
-		if err = s.UpdateProductToCooked(u.Id, prodName, time.Now().Format("2006-01-02")); err != nil {
+		if err = d.Conn.updateProductToCooked(u.Id, prodName, time.Now().Format("2006-01-02")); err != nil {
 			return mes.Default
 		}
 	case "выкинут":
-		if err = s.UpdateProductToDispose(u.Id, prodName, time.Now().Format("2006-01-02")); err != nil {
+		if err = d.Conn.updateProductToDispose(u.Id, prodName, time.Now().Format("2006-01-02")); err != nil {
 			return mes.Default
 		}
 	}
@@ -142,15 +167,18 @@ func ChangeStatus(username string, prodName string, status string, s Connection,
 
 }
 
-func UsedProcutList(username string, s Connection, mes config.Config) string {
+func (d *DB) UsedProcutList(username string, mes config.Config) string {
 	var str string
-	u, err := s.GetUserByUsername(username)
+	u, err := d.Conn.getUserByUsername(username)
 	if err != nil {
 		return mes.UserNotFound
 	}
-	list, err := s.GetUsedProductsList(u.Id)
+	list, err := d.Conn.getUsedProductsList(u.Id)
 	if err != nil {
 		return mes.Default
+	}
+	if len(list) == 0 {
+		return mes.NoRows
 	}
 	for _, v := range list {
 		switch v.Status {
@@ -164,16 +192,19 @@ func UsedProcutList(username string, s Connection, mes config.Config) string {
 	return str
 }
 
-func GetStats(username string, fDate string, sDate string, s Connection, mes config.Config) string {
+func (d *DB) GetStats(username string, fDate string, sDate string, mes config.Config) string {
 	var cookedCount int
 	var disposeCount int
-	u, err := s.GetUserByUsername(username)
+	u, err := d.Conn.getUserByUsername(username)
 	if err != nil {
 		return mes.UserNotFound
 	}
-	list, err := s.GetStatsByDateDifference(u.Id, fDate, sDate)
+	list, err := d.Conn.getStatsByDateDifference(u.Id, fDate, sDate)
 	if err != nil {
 		return mes.Default
+	}
+	if len(list) == 0 {
+		return mes.NoRows
 	}
 	for _, v := range list {
 		if v.Status == "used" {
@@ -185,26 +216,38 @@ func GetStats(username string, fDate string, sDate string, s Connection, mes con
 	return fmt.Sprintf("Количество приготовленных продуктов: %v\nКоличество выкинутых продуктов: %v", cookedCount, disposeCount)
 }
 
-func SchedulerBuyList(userId int, s Connection) []BuyList {
-	list, err := s.GetBuyListForScheduler(userId)
+func (d *DB) SchedulerBuyList(userId int) []BuyList {
+	list, err := d.Conn.getBuyListForScheduler(userId)
 	if err != nil {
 		log.Println(err)
 	}
 	return list
 }
 
-func SchedulerFridge(userId int, s Connection) []Fridge {
-	list, err := s.GetFridgeListForScheduler(userId)
+func (d *DB) SchedulerFridge(userId int) []Fridge {
+	list, err := d.Conn.getFridgeListForScheduler(userId)
 	if err != nil {
 		log.Println(err)
 	}
 	return list
 }
 
-func UsersList(s Connection) []Users {
-	users, err := s.GetUsersList()
+func (d *DB) UsersList() []Users {
+	users, err := d.Conn.getUsersList()
 	if err != nil {
 		log.Println(err)
 	}
 	return users
+}
+
+func (d *DB) AddUser(username string, chatId int64, mes config.Config) string {
+	_, err := d.Conn.getUserByUsername(username)
+	if err != nil {
+		err = d.Conn.addUser(username, chatId)
+		if err != nil {
+			return mes.Start
+		}
+	}
+	return mes.Start
+
 }

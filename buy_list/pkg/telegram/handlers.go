@@ -4,21 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/IB133/RPBD/buy_list/pkg/db"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func (b *Bot) handleCommands(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig) error {
 	switch mes.Command() {
 	case "start":
-		if _, err := b.que.GetUserByUsername(mes.From.UserName); err == nil {
-			msg.Text = b.cnf.Start
-			msg.ReplyMarkup = b.cnf.Main
-			break
-		}
-		b.que.AddUser(mes.From.UserName, int(mes.Chat.ID))
-		msg.Text = b.cnf.Start
+		msg.Text = b.que.AddUser(mes.From.UserName, mes.Chat.ID, *b.cnf)
 		msg.ReplyMarkup = b.cnf.Main
 	default:
 		msg.Text = "Неизвестная команда"
@@ -44,13 +36,13 @@ func (b *Bot) handleKeyboard(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 		b.cnf.Current = b.cnf.BuyOrNew
 
 	case b.cnf.Main.Keyboard[1][0].Text:
-		msg.Text = db.StoredProductList(mes.From.UserName, *b.que, *b.cnf)
+		msg.Text = b.que.StoredProductList(mes.From.UserName, *b.cnf)
 		msg.ReplyMarkup = b.cnf.Cancel
 		b.cnf.OpenProduct = true
 		b.cnf.UserInsert = true
 
 	case b.cnf.Main.Keyboard[1][1].Text:
-		msg.Text = fmt.Sprintf("Выберите продукт из списка\n%s", db.FridgeList(mes.From.UserName, *b.que, *b.cnf))
+		msg.Text = fmt.Sprintf("Выберите продукт из списка\n%s", b.que.FridgeList(mes.From.UserName, *b.cnf))
 		msg.ReplyMarkup = b.cnf.Cancel
 		b.cnf.ChangeStatus = true
 		b.cnf.UserInsert = true
@@ -62,15 +54,15 @@ func (b *Bot) handleKeyboard(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 		b.cnf.UserInsert = true
 
 	case b.cnf.Main.Keyboard[2][0].Text:
-		msg.Text = db.FridgeList(mes.From.UserName, *b.que, *b.cnf)
+		msg.Text = b.que.FridgeList(mes.From.UserName, *b.cnf)
 
 	case b.cnf.Main.Keyboard[2][1].Text:
-		msg.Text = db.UsedProcutList(mes.From.UserName, *b.que, *b.cnf)
+		msg.Text = b.que.UsedProcutList(mes.From.UserName, *b.cnf)
 
 	case b.cnf.BuyOrNew.Keyboard[0][0].Text:
 		b.cnf.AddToFridgeFromBuyList = true
 		b.cnf.UserInsert = true
-		msg.Text = db.GetBuyList(mes.From.UserName, *b.que, *b.cnf)
+		msg.Text = b.que.GetBuyList(mes.From.UserName, *b.cnf)
 
 	case b.cnf.BuyOrNew.Keyboard[0][1].Text:
 		b.cnf.AddToFridge = true
@@ -105,16 +97,8 @@ func (b *Bot) handleMessages(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 			msg.Text = "Неверный ввод"
 			break
 		}
-		u, err := b.que.GetUserByUsername(mes.From.UserName)
-		if err != nil {
-			msg.Text = err.Error()
-			break
-		}
-		if err := b.que.AddProductToBuyList(u.Id, str[0], str[1], str[2]); err != nil {
-			msg.Text = err.Error()
-			break
-		}
-		msg.Text = "Заебсиь чотко"
+		msg.Text = b.que.AddToBuyList(mes.From.UserName, str[0], str[1], str[2], *b.cnf)
+		msg.ReplyMarkup = b.cnf.Cancel
 		b.cnf.AddToBuyList = false
 		b.cnf.UserInsert = false
 
@@ -124,7 +108,7 @@ func (b *Bot) handleMessages(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 			msg.Text = "Неверный ввод"
 			break
 		}
-		msg.Text = db.AddProductToFridge(str[0], mes.From.UserName, str[1], *b.que, *b.cnf)
+		msg.Text = b.que.AddProductToFridge(str[0], mes.From.UserName, str[1], *b.cnf)
 		msg.ReplyMarkup = b.cnf.BuyOrNew
 		b.cnf.AddToFridge = false
 		b.cnf.UserInsert = false
@@ -135,7 +119,7 @@ func (b *Bot) handleMessages(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 			msg.Text = "Неверный ввод"
 			break
 		}
-		msg.Text = db.AddProductToFridgeFromBuyList(str[0], mes.From.UserName, str[1], *b.que, *b.cnf)
+		msg.Text = b.que.AddProductToFridgeFromBuyList(str[0], mes.From.UserName, str[1], *b.cnf)
 		msg.ReplyMarkup = b.cnf.BuyOrNew
 		b.cnf.AddToFridgeFromBuyList = false
 		b.cnf.UserInsert = false
@@ -146,7 +130,7 @@ func (b *Bot) handleMessages(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 			msg.Text = b.cnf.ErrorInsert
 			break
 		}
-		msg.Text = db.OpenProduct(mes.From.UserName, str[0], str[1], *b.que, *b.cnf)
+		msg.Text = b.que.OpenProduct(mes.From.UserName, str[0], str[1], *b.cnf)
 		b.cnf.OpenProduct = false
 		b.cnf.UserInsert = false
 
@@ -156,7 +140,7 @@ func (b *Bot) handleMessages(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 			msg.Text = b.cnf.ErrorInsert
 			break
 		}
-		msg.Text = db.ChangeStatus(mes.From.UserName, str[0], str[1], *b.que, *b.cnf)
+		msg.Text = b.que.ChangeStatus(mes.From.UserName, str[0], str[1], *b.cnf)
 		b.cnf.ChangeStatus = false
 		b.cnf.UserInsert = false
 
@@ -166,7 +150,7 @@ func (b *Bot) handleMessages(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 			msg.Text = b.cnf.ErrorInsert
 			break
 		}
-		msg.Text = db.GetStats(mes.From.UserName, str[0], str[1], *b.que, *b.cnf)
+		msg.Text = b.que.GetStats(mes.From.UserName, str[0], str[1], *b.cnf)
 		b.cnf.GetStatistic = false
 		b.cnf.UserInsert = false
 

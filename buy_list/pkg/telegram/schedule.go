@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/IB133/RPBD/buy_list/pkg/config"
-	"github.com/IB133/RPBD/buy_list/pkg/db"
 	"github.com/go-co-op/gocron"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -14,7 +13,7 @@ import (
 func (b *Bot) StartScheduler(cnf *config.Config) {
 	cnf.BuyListSched = gocron.NewScheduler(time.Local)
 	cnf.FridgeSched = gocron.NewScheduler(time.Local)
-	users := db.UsersList(*b.que)
+	users := b.que.UsersList()
 	for _, u := range users {
 		id := u.Id
 		chatId := u.Chat_id
@@ -40,7 +39,7 @@ func (b *Bot) StartScheduler(cnf *config.Config) {
 }
 
 func createBuyListScheduler(b *Bot, chatId int64, userId int) {
-	list := db.SchedulerBuyList(userId, *b.que)
+	list := b.que.SchedulerBuyList(userId)
 	if list == nil {
 		return
 	}
@@ -56,7 +55,7 @@ func createBuyListScheduler(b *Bot, chatId int64, userId int) {
 
 func createFridgeScheduler(b *Bot, chatId int64, userId int) {
 	var str string
-	list := db.SchedulerFridge(userId, *b.que)
+	list := b.que.SchedulerFridge(userId)
 	if list == nil {
 		return
 	}
