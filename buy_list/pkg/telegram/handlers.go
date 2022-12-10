@@ -22,7 +22,7 @@ func (b *Bot) handleCommands(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 func (b *Bot) handleKeyboard(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig) error {
 	switch mes.Text {
 	case b.cnf.Main.Keyboard[0][0].Text:
-		msg.Text = "Добавление в список покупок"
+		msg.Text = b.cnf.AddingBuyList
 		msg.ReplyMarkup = b.cnf.Cancel
 		b.cnf.AddToBuyList = true
 		b.cnf.UserInsert = true
@@ -31,7 +31,7 @@ func (b *Bot) handleKeyboard(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 	// 	msg.ReplyMarkup = b.keyboards.Main
 
 	case b.cnf.Main.Keyboard[0][1].Text:
-		msg.Text = "Выберите откуда добавить продукт"
+		msg.Text = b.cnf.AddingFridgeList
 		msg.ReplyMarkup = b.cnf.Keyboards.BuyOrNew
 		b.cnf.Current = b.cnf.BuyOrNew
 
@@ -42,13 +42,13 @@ func (b *Bot) handleKeyboard(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 		b.cnf.UserInsert = true
 
 	case b.cnf.Main.Keyboard[1][1].Text:
-		msg.Text = fmt.Sprintf("Выберите продукт из списка\n%s", b.que.FridgeList(mes.From.UserName, *b.cnf))
+		msg.Text = fmt.Sprintf("%s\n%s", b.cnf.StatusChange, b.que.FridgeList(mes.From.UserName, *b.cnf))
 		msg.ReplyMarkup = b.cnf.Cancel
 		b.cnf.ChangeStatus = true
 		b.cnf.UserInsert = true
 
 	case b.cnf.Main.Keyboard[1][2].Text:
-		msg.Text = "Введите две даты, между которыми нужно получить статистику."
+		msg.Text = b.cnf.GetStats
 		msg.ReplyMarkup = b.cnf.Cancel
 		b.cnf.GetStatistic = true
 		b.cnf.UserInsert = true
@@ -62,12 +62,12 @@ func (b *Bot) handleKeyboard(mes *tgbotapi.Message, msg *tgbotapi.MessageConfig)
 	case b.cnf.BuyOrNew.Keyboard[0][0].Text:
 		b.cnf.AddToFridgeFromBuyList = true
 		b.cnf.UserInsert = true
-		msg.Text = b.que.GetBuyList(mes.From.UserName, *b.cnf)
+		msg.Text = fmt.Sprintf("%s\n%s", b.cnf.AddingFridgeListBuy, b.que.GetBuyList(mes.From.UserName, *b.cnf))
 
 	case b.cnf.BuyOrNew.Keyboard[0][1].Text:
 		b.cnf.AddToFridge = true
 		b.cnf.UserInsert = true
-		msg.Text = "Введите продукт"
+		msg.Text = b.cnf.AddingFridgeListNew
 
 	case b.cnf.BuyOrNew.Keyboard[0][2].Text:
 		msg.ReplyMarkup = b.cnf.Main

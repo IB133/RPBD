@@ -6,6 +6,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
@@ -38,10 +41,22 @@ type Connection struct {
 func NewConnect(connString string) (*DB, error) {
 	conn, err := sqlx.Connect("postgres", connString)
 	if err != nil {
-		log.Fatal()
+		log.Fatal(err)
 	}
+	driver, err := postgres.WithInstance(conn.DB, &postgres.Config{})
+	if err != nil {
+		panic(err)
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://migrations",
+		"postgres", driver)
+	if err != nil {
+		panic(err)
+	}
+	m.Up()
 	return &DB{
-		Conn: Connection{conn: conn},
+		Conn: &Connection{conn: conn},
 	}, nil
 }
 
@@ -95,7 +110,7 @@ func (c *Connection) getFridgeList(userId int) ([]Fridge, error) {
 	SELECT prod_name, status, experitation_date
 	FROM fridge
 	WHERE user_id = $1 AND (status = 'opened' OR status = 'stored')
-	ORDER BY prod_name DESC;
+	ORDER BY prod_name;
 	`, userId)
 	if err != nil {
 		return nil, fmt.Errorf("query failed: %w", err)

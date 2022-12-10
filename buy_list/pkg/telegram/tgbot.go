@@ -26,7 +26,7 @@ func NewBot(cfg *config.Config) *Bot {
 	if err != nil {
 		log.Fatal(err)
 	}
-	conn, err := db.NewConnect(fmt.Sprintf("postgres://%s:%s@%s:%s/%s", os.Getenv("DBNAME"), os.Getenv("DBPASSWORD"), os.Getenv("DBHOST"), os.Getenv("DBPORT"), os.Getenv("DBUSER")))
+	conn, err := db.NewConnect(fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", os.Getenv("DBUSER"), os.Getenv("DBPASSWORD"), os.Getenv("DBHOST"), os.Getenv("DBPORT"), os.Getenv("DBNAME")))
 	if err != nil {
 		log.Fatal()
 	}

@@ -8,13 +8,28 @@ import (
 	"github.com/IB133/RPBD/buy_list/pkg/config"
 )
 
-//go:generate moq -out querys_test.go . Querys
+//go:generate moq -out querys_mock_test.go . Querys
 type Querys interface {
-	GetBuyList(username string, s Connection) (string, error)
+	AddProductToBuyList(userId int, name string, weight string, time string) error
+	AddProductToFridge(userId int, name string, date string) error
+	GetBuyList(userId int) ([]BuyList, error)
+	GetUserByUsername(username string) (Users, error)
+	GetFridgeList(userId int) ([]Fridge, error)
+	GetUsedProductsList(userId int) ([]Fridge, error)
+	DeleteFromBuyList(userId int, name string)
+	UpdateProductToCooked(userId int, name string, date string) error
+	UpdateProductToDispose(userId int, name string, date string) error
+	OpenProduct(userId int, name string, date string) error
+	AddUser(name string, chatId int64) error
+	GetStoredProductsList(userId int) ([]Fridge, error)
+	GetStatsByDateDifference(userId int, firstDate string, secondDate string) ([]Fridge, error)
+	GetBuyListForScheduler(userId int) ([]BuyList, error)
+	GetFridgeListForScheduler(userId int) ([]Fridge, error)
+	GetUsersList() ([]Users, error)
 }
 
 type DB struct {
-	Conn Connection
+	Conn *Connection
 }
 
 func (d *DB) AddToBuyList(username string, prodName string, weight string, date string, mes config.Config) string {
@@ -105,7 +120,7 @@ func (d *DB) StoredProductList(username string, mes config.Config) string {
 	for _, v := range list {
 		str += fmt.Sprintf("%s  %s %s\n", v.Prod_name, "хранится", v.Experitation_date.Format("2006-01-02"))
 	}
-	return fmt.Sprintf("Выберите продукт из списка\n %s", str)
+	return fmt.Sprintf("%s\n %s", mes.ProductOpen, str)
 }
 
 func (d *DB) OpenProduct(username string, prodName string, newDate string, mes config.Config) string {

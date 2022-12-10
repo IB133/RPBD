@@ -61,7 +61,7 @@ services:
   #     #   - new
   #     volumes:
   #        - .:/migrations
-  #     command: ["-path", "/migrations", "-database",  "postgres://postgres:pass@host.docker.internal:8081/test?sslmode=disable", "up", "1"]
+  #     command: ["-path", "/migrations", "-database",  "postgres://postgres:pass@postgres:5432/test?sslmode=disable", "down", "1"]
   #     links: 
   #       - postgres
   #     depends_on:

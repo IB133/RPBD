@@ -37,8 +37,15 @@ type Keyboards struct {
 }
 
 type Responses struct {
-	Start      string `mapstructure:"start"`
-	Succesfull string `mapstructure:"succesfull"`
+	Start               string `mapstructure:"start"`
+	Succesfull          string `mapstructure:"succesfull"`
+	AddingBuyList       string `mapstructure:"add_buy_list"`
+	AddingFridgeList    string `mapstructure:"add_fridge_list"`
+	AddingFridgeListBuy string `mapstructure:"add_fridge_list_from_buy"`
+	AddingFridgeListNew string `mapstructure:"add_fridge_list_new"`
+	GetStats            string `mapstructure:"get_stats"`
+	StatusChange        string `mapstructure:"change_status"`
+	ProductOpen         string `mapstructure:"open_product"`
 }
 
 type Errors struct {
