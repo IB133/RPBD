@@ -15,7 +15,7 @@ import (
 
 type Users struct {
 	Id      int
-	Chat_id int64
+	Chat_id int64 `db:"chat_id"`
 	Name    string
 }
 

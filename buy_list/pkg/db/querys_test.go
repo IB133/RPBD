@@ -14,6 +14,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
+// TODO: main test
 func CreateTestDatabase() (testcontainers.Container, *sqlx.DB) {
 	containerReq := testcontainers.ContainerRequest{
 		Image:        "postgres:latest",
@@ -66,6 +67,8 @@ func CreateTestDatabase() (testcontainers.Container, *sqlx.DB) {
 }
 
 func TestAddUsers(t *testing.T) {
+	clean(t)
+	// TODO: cleanup, delete from tables
 	container, conn := CreateTestDatabase()
 	defer container.Terminate(context.Background())
 	query := Connection{
@@ -75,6 +78,12 @@ func TestAddUsers(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+}
+
+func clean(t *testing.T) {
+	t.Cleanup(func() {
+		// DELETE FROM table....
+	})
 }
 
 func TestAddProductToBuyList(t *testing.T) {
