@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"log"
+
+	"github.com/IB133/RPBD/final_project/internal/app"
+	"github.com/IB133/RPBD/final_project/internal/config"
+)
 
 func main() {
-	fmt.Println("My API")
+	conf := config.NewConfig()
+	if err := app.Start(conf); err != nil {
+		log.Fatal(err)
+	}
 }
