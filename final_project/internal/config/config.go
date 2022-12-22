@@ -8,9 +8,9 @@ import (
 )
 
 type Config struct {
-	HTTPPort   string
 	LogLevel   string
-	DBNname    string
+	HTTPPort   string
+	DBName     string
 	DBUser     string
 	DBPassword string
 	DBHost     string

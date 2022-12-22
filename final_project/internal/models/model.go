@@ -3,15 +3,16 @@ package models
 import (
 	"time"
 
-	"github.com/go-playground/validator/v10"
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	Id       int
-	Email    string `validate:"required,email"`
-	Password string `validate:"required,min=8,max=25"`
-	Login    string `validate:"required"`
+	Id       int    `json:"-"`
+	Email    string `json:"email"`
+	Password string `json:"password,omitempty"`
+	Login    string `json:"login"`
 }
 
 type Comments struct {
@@ -42,9 +43,14 @@ func (u *User) HashPassword() error {
 	return err
 }
 
-func (u *User) ValidateUser(v *validator.Validate) error {
-	if err := v.Struct(u); err != nil {
-		return err
-	}
-	return nil
+func (u *User) Validate() error {
+	return validation.ValidateStruct(
+		u,
+		validation.Field(&u.Email, validation.Required, is.Email),
+		validation.Field(&u.Password, validation.Required, validation.Length(8, 25)),
+		validation.Field(&u.Login, validation.Required))
+}
+
+func (u *User) ClearPassword() {
+	u.Password = ""
 }

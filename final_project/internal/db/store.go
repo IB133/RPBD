@@ -5,8 +5,6 @@ import (
 
 	"github.com/IB133/RPBD/final_project/internal/models"
 
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -21,18 +19,18 @@ func NewConnect(connString string) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	driver, err := postgres.WithInstance(conn.DB, &postgres.Config{})
-	if err != nil {
-		return nil, err
-	}
+	// driver, err := postgres.WithInstance(conn.DB, &postgres.Config{})
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
-		"postgres", driver)
-	if err != nil {
-		panic(err)
-	}
-	m.Up()
+	// m, err := migrate.NewWithDatabaseInstance(
+	// 	"file://migrations",
+	// 	"postgres", driver)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// m.Up()
 	return &Service{
 		db: &Store{conn: conn},
 	}, nil

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/IB133/RPBD/final_project/internal/app"
@@ -8,8 +9,9 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 	conf := config.NewConfig()
-	if err := app.Start(conf); err != nil {
+	if err := app.Start(conf, ctx); err != nil {
 		log.Fatal(err)
 	}
 }
