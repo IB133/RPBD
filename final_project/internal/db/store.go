@@ -50,7 +50,7 @@ func (s *Store) addUSer(ctx context.Context, u *models.User) error {
 func (s *Store) getUserByEmail(ctx context.Context, email string) (models.User, error) {
 	var user []models.User
 	err := s.conn.SelectContext(ctx, &user, `
-	SELECT id, password
+	SELECT id, password, role, email
 	FROM users
 	WHERE email = $1;
 	`, email)

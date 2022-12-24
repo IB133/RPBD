@@ -20,7 +20,8 @@ const (
 
 type tokenClaims struct {
 	jwt.StandardClaims
-	UserId int `json:"user_id"`
+	UserId int    `json:"user_id"`
+	Role   string `json:"role"`
 }
 
 func (s *Service) Registration(ctx context.Context, u *models.User) error {
@@ -50,6 +51,7 @@ func (s *Service) AuthAndGenerateToken(ctx context.Context, u *models.User) (str
 			IssuedAt:  time.Now().Unix(),
 		},
 		UserId: u.Id,
+		Role:   u.Role,
 	})
 	return token.SignedString([]byte(singingString))
 }

@@ -15,7 +15,6 @@ func Start(cfg *config.Config, ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-
 	srv := newServer(store, ctx)
 	return http.ListenAndServe(cfg.HTTPPort, srv)
 }

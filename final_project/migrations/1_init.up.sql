@@ -36,5 +36,6 @@ CREATE TABLE comments(
     status bool DEFAULT true
 );
 
-
+INSERT INTO person(login, password, role)
+VALUES('mainmoder', 'moderpassword', 'moder');
 COMMIT;

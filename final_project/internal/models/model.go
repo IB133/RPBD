@@ -11,6 +11,7 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password,omitempty"`
 	Login    string `json:"login"`
+	Role     string `json:"role"`
 }
 
 type Comments struct {
