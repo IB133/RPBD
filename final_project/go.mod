@@ -6,6 +6,7 @@ require (
 	github.com/cristalhq/aconfig v0.18.3
 	github.com/cristalhq/aconfig/aconfigdotenv v0.17.1
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
+	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/julienschmidt/httprouter v1.3.0
