@@ -9,12 +9,10 @@ import (
 	"github.com/IB133/RPBD/final_project/internal/db"
 	"github.com/IB133/RPBD/final_project/internal/models"
 	"github.com/julienschmidt/httprouter"
-	"github.com/sirupsen/logrus"
 )
 
 type server struct {
 	router *httprouter.Router
-	logger *logrus.Logger
 	store  *db.Service
 	ctx    context.Context
 }
@@ -23,7 +21,6 @@ func newServer(db *db.Service, ctx context.Context) *server {
 
 	s := &server{
 		router: httprouter.New(),
-		logger: logrus.New(),
 		store:  db,
 		ctx:    ctx,
 	}

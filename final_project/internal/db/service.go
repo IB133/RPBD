@@ -28,6 +28,16 @@ func (s *Service) Registration(ctx context.Context, u *models.User) error {
 	if err := u.ValidateRegistration(); err != nil {
 		return err
 	}
+	usr, err := s.db.getUserByEmail(ctx, u.Email)
+	if err != nil {
+		return nil
+	}
+	if usr.Email != "" {
+		fmt.Errorf("User with this email, already exists.")
+	}
+	if usr.Login != "" {
+		fmt.Errorf("User with this login, already exists.")
+	}
 	if err := u.HashPassword(); err != nil {
 		return err
 	}
