@@ -1,0 +1,54 @@
+version: '2.4'
+services:
+  postgres:
+    image: postgres:15.1
+    container_name: apiserver-postgres
+    volumes:
+      - apiserver:/var/lib/postgresql/data
+
+    ports:
+    - 6432:5432
+
+    logging:
+      driver: json-file
+      options:
+        max-size: '100m'
+        max-file: '5'
+
+    environment:
+     - POSTGRES_USER=${DB_USER}
+     - POSTGRES_PASSWORD=${DB_PASSWORD}     
+     - POSTGRES_DB=${DB_NAME}
+     - DATABASE_HOST=${DB_HOST}
+     - DATABASE_PORT=${DB_PORT}
+
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  apiserver:
+    build: 
+      context: .
+
+    image: finalproject:latest
+    container_name: apiserver
+    environment:
+      - HTTPPORT = ${HTTP_PORT}
+      - DBNAME = ${DB_NAME}
+      - DBUSER = ${DB_USER}
+      - DBPASSWORD = ${DB_PASSWORD}
+      - DBHOST  = ${DB_HOST}
+      - DBPORT = ${DB_PORT}
+    hostname: apiserver
+    ports:
+      - 8080:8080
+    
+    logging:
+      driver: json-file
+      options:
+        max-size: '100m'
+        max-file: '5'
+volumes:
+  apiserver:

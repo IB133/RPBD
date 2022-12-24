@@ -21,7 +21,7 @@ func NewConfig() *Config {
 	var cfg Config
 	loader := aconfig.LoaderFor(&cfg, aconfig.Config{
 		SkipFlags: true,
-		Files:     []string{"config.env"},
+		Files:     []string{".env"},
 		FileDecoders: map[string]aconfig.FileDecoder{
 			".env": aconfigdotenv.New(),
 		},
